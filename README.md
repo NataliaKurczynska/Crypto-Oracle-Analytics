@@ -1,1 +1,1 @@
-# CryptoPredictApp
+Crypto-Oracle-Analytics
