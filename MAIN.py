@@ -9,6 +9,8 @@ import matplotlib.dates as mdates
 #import pmdarima as pm #do ARIMA szacujacego p,d,q
 from statsmodels.tsa.arima.model import ARIMA
 import os
+import matplotlib.pyplot as plt
+plt.style.use("ggplot")
 
 class CryptoOracleApp:
     def __init__(self, root):
@@ -114,6 +116,7 @@ class CryptoOracleApp:
     # Funkcja tworząca wykres
     # ===============================
     def _create_plot(self, parent):
+        plt.style.use("ggplot")
         self.plot_frame = ttk.Frame(parent)
         self.plot_frame.grid(row=0, column=1, sticky="nsew", padx=5)
 
@@ -236,11 +239,11 @@ class CryptoOracleApp:
             self.ax.annotate(
                 label,
                 xy=(pred_date, pred_value),
-                xytext=(15, 15),              # przesunięcie tekstu
+                xytext=(15, 15),                # przesunięcie tekstu
                 textcoords="offset points",
                 bbox=dict(
                     boxstyle="round,pad=0.4",
-                    fc="lightyellow",
+                    fc="#cbe7ff",
                     ec="red",
                     lw=1
                     ),
@@ -250,6 +253,7 @@ class CryptoOracleApp:
                     ),
                 fontsize=9
                 )
+            
             self.ax.plot(dates_window[original_len:], value_window[original_len:], color='red', marker='o', markersize=6, linestyle='')
             self.ax.plot(dates_window[original_len-1:], value_window[original_len-1:], color='red', marker='', markersize=6, linestyle='-')
 
