@@ -6,7 +6,9 @@ import pandas as pd
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import matplotlib.dates as mdates
-
+#import pmdarima as pm #do ARIMA szacujacego p,d,q
+from statsmodels.tsa.arima.model import ARIMA
+import os
 
 class CryptoOracleApp:
     def __init__(self, root):
@@ -48,6 +50,7 @@ class CryptoOracleApp:
         # Wykres po prawej
         # -------------------
         self._create_plot(content_frame)
+        self.crypto_name = "Wykres danych"
 
         # -------------------
         # Przyciski i Entry
@@ -134,6 +137,8 @@ class CryptoOracleApp:
         )
         if not file_path:
             return
+        
+        self.crypto_name = os.path.splitext(os.path.basename(file_path))[0]
 
         df = pd.read_csv(file_path, sep=';')
         time_col = df.columns[0]
@@ -156,13 +161,28 @@ class CryptoOracleApp:
     # ===============================
     
     def predict(self):
-        values = [float(self.table.item(item)["values"][1]) for item in self.table.get_children()]
-        last_value = values[-1]
+        values = [float(self.table.item(item)["values"][1]) 
+              for item in self.table.get_children()]
+
+        # minimalna liczba obserwacji
+        if len(values) < 20:
+            return values[-1]
+
+        series = pd.Series(values)
+
+        try:
+            model = ARIMA(series, order=(5, 1, 0))
+            model_fit = model.fit()
+
+            forecast = model_fit.forecast(steps=1)
+            predicted_value = forecast.iloc[0]
+
+            return predicted_value
+
+        except Exception as e:
+            print("Błąd ARIMA:", e)
+            return values[-1]
         
-        delta = np.random.normal(loc=0, scale=0.5)
-        predicted_value = last_value + delta
-        
-        return predicted_value
     
     def predict_next(self):
         if not self.table.get_children():
@@ -208,10 +228,32 @@ class CryptoOracleApp:
             self.ax.plot(dates_window[:original_len], value_window[:original_len], color='blue', linestyle='-')
 
         if self.predicted > 0:
+            pred_date = dates_window[-1]
+            pred_value = value_window[-1]
+
+            label = f"Predykcja \n{pred_value:.4f}"
+
+            self.ax.annotate(
+                label,
+                xy=(pred_date, pred_value),
+                xytext=(15, 15),              # przesunięcie tekstu
+                textcoords="offset points",
+                bbox=dict(
+                    boxstyle="round,pad=0.4",
+                    fc="lightyellow",
+                    ec="red",
+                    lw=1
+                    ),
+                arrowprops=dict(
+                    arrowstyle="->",
+                    color="red"
+                    ),
+                fontsize=9
+                )
             self.ax.plot(dates_window[original_len:], value_window[original_len:], color='red', marker='o', markersize=6, linestyle='')
             self.ax.plot(dates_window[original_len-1:], value_window[original_len-1:], color='red', marker='', markersize=6, linestyle='-')
 
-        self.ax.set_title("Wykres danych")
+        self.ax.set_title(f"{self.crypto_name}")
         self.ax.set_xlabel("Time")
         self.ax.set_ylabel("Value")
         self.ax.grid(True)
