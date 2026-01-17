@@ -12,6 +12,8 @@ import matplotlib.dates as mdates
 #import pmdarima as pm #do ARIMA szacujacego p,d,q
 from statsmodels.tsa.arima.model import ARIMA
 import os
+import matplotlib.pyplot as plt
+plt.style.use("ggplot")
 
 # -------------------
 # Kod aplikacji
@@ -121,6 +123,7 @@ class CryptoOracleApp:
     # Funkcja tworząca wykres
     # ===============================
     def _create_plot(self, parent):
+        plt.style.use("ggplot")
         self.plot_frame = ttk.Frame(parent)
         self.plot_frame.grid(row=0, column=1, sticky="nsew", padx=5) # frame grid rozciąga się w kierunkach nsew i znajduje sie w 2 kolumnie i 1 wierszu siatki aplikacji
 
@@ -281,6 +284,8 @@ class CryptoOracleApp:
                     ),
                 fontsize=9                       # rozmiar czcionki
                 )
+            
+
             # ---- czerwone kropki dla wszystkich predykcji (bez łączenia z poprzednią linią) ----
             self.ax.plot(dates_window[original_len:], value_window[original_len:], color='red', marker='o', markersize=6, linestyle='')
             # ---- linia łącząca ostatni punkt danych oryginalnych z pierwszą predykcją ----
