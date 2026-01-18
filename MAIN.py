@@ -139,7 +139,6 @@ class CryptoOracleApp:
     # Funkcja tworząca wykres
     # ===============================
     def _create_plot(self, parent):
-        plt.style.use("ggplot")
         self.plot_frame = ttk.Frame(parent)
         self.plot_frame.grid(row=0, column=1, sticky="nsew", padx=5) # frame grid rozciąga się w kierunkach nsew i znajduje sie w 2 kolumnie i 1 wierszu siatki aplikacji
 
@@ -200,8 +199,13 @@ class CryptoOracleApp:
     def predict(self):
         start_time = time.perf_counter() # Rozpoczynamy mierzenie czasu predykcji
         # pobieramy wszystkie wartości z kolumny "Value" tabeli i zamieniamy na float
-        values = [float(self.table.item(item)["values"][1]) 
-              for item in self.table.get_children()]
+        values = []
+
+        for item in self.table.get_children():
+            try:
+                values.append(float(str(self.table.item(item)["values"][1]).replace(",", ".")))
+            except ValueError: #obsluga błędu (jeżeli wystapi pustka komórka, spacja na końcu itp.)
+                pass
 
         # minimalna liczba obserwacji potrzebna do modelu ARIMA
         if len(values) < 20:
@@ -276,7 +280,13 @@ class CryptoOracleApp:
             
         # pobieramy wszystkie wartości z tabeli
         time_col = [self.table.item(item)["values"][0] for item in self.table.get_children()]
-        value_col = [float(self.table.item(item)["values"][1]) for item in self.table.get_children()]
+        value_col = []
+
+        for item in self.table.get_children():
+            try:
+                value_col.append(float(str(self.table.item(item)["values"][1]).replace(",", ".")))
+            except ValueError:
+                pass
 
         # wybieramy tylko ostatnie 'window_size' punktów, jeśli mamy ich więcej
         time_window = time_col[-window_size:] if len(time_col) > window_size else time_col
@@ -308,9 +318,9 @@ class CryptoOracleApp:
                     x=pred_date,
                     ymin=lower,
                     ymax=upper,
-                    colors="red",
+                    colors="#FA8078",
                     linestyles="dashed",
-                    linewidth=2,
+                    linewidth=1.5,
                     alpha=0.8)
             
             # ---- tekst do wyświetlenia przy predykcji ----
@@ -326,13 +336,13 @@ class CryptoOracleApp:
                 textcoords="offset points",      # mówi Matplotlib, że przesunięcie (15, 15) jest w punktach (points), a nie np. w jednostkach danych osi X/Y
                 bbox=dict(                       # obramowanie tekstu
                     boxstyle="round,pad=0.4",
-                    fc="lightyellow",            # kolor tła
-                    ec="red",                    # kolor obramowania
+                    fc="#D5F5F7",            # kolor tła
+                    ec="#E02519",            # kolor obramowania
                     lw=1
                     ),
                 arrowprops=dict(                 # strzałka wskazująca punkt
                     arrowstyle="->",
-                    color="red"
+                    color="#E02519"
                     ),
                 fontsize=9)                      # rozmiar czcionki
             
