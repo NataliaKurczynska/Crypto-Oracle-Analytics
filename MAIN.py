@@ -86,6 +86,9 @@ class CryptoOracleApp:
         self.window_entry.insert(0, "200")  # 200 - domyślna wartość
         self.window_entry.pack(side="left", padx=5)
         
+        export_btn = ttk.Button(button_frame, text="Eksport wykresu", command=self.export_plot)
+        export_btn.pack(side="left", padx=10)
+        
         refresh_btn = ttk.Button(button_frame, text="Odśwież wykres", command=self.refresh_plot)  # po nacinięciu uruchamia refresh_plot()
         refresh_btn.pack(side="left", padx=10)  #pozycjonowanie przycisku
         
@@ -350,6 +353,33 @@ class CryptoOracleApp:
         self.fig.autofmt_xdate(rotation=45)                               # Automatycznie obraca i dopasowuje etykiety osi X, żeby się nie nakładały.
 
         self.canvas.draw()  # Odświeża Tkinterowy widget wykresu, żeby pokazał wszystkie zmiany
+    
+    def export_plot(self):
+    # jeśli nie ma danych – nie zapisujemy
+        if not self.table.get_children():
+            tk.messagebox.showwarning("Brak danych", "Nie ma wykresu do zapisania!")
+            return
+
+       # domyślna nazwa pliku
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        default_name = f"{self.crypto_name}_{timestamp}.png"
+
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".png",
+            initialfile=default_name,
+            filetypes=[
+                ("PNG", "*.png"),
+                ("JPG", "*.jpg"),
+                ("All files", "*.*")], title="Zapisz wykres")
+
+        if not file_path:
+            return
+              # user kliknął Anuluj
+        try:
+            self.fig.savefig(file_path, dpi=300, bbox_inches="tight")
+            tk.messagebox.showinfo("Sukces", f"Wykres zapisany:\n{file_path}")
+        except Exception as e:
+            tk.messagebox.showerror("Błąd", f"Nie udało się zapisać wykresu:\n{e}")
 
 
 # ===============================
